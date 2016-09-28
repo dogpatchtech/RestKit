@@ -52,10 +52,13 @@ static BOOL RKIsManagedObjectContextDescendentOfContext(NSManagedObjectContext *
 
 static NSSet *RKSetOfManagedObjectIDsFromManagedObjectContextDidSaveNotification(NSNotification *notification)
 {
-    NSUInteger count = [[[notification.userInfo allValues] valueForKeyPath:@"@sum.@count"] unsignedIntegerValue];
-    NSMutableSet *objectIDs = [NSMutableSet setWithCapacity:count];
+    // Fix pulled for iOS 10. I forked from restkit 0.25 and put this in
+    // Taken from: https://github.com/RestKit/RestKit/issues/2459
+    NSMutableSet *objectIDs = [NSMutableSet new];
     for (NSSet *objects in [notification.userInfo allValues]) {
-        [objectIDs unionSet:[objects valueForKey:@"objectID"]];
+        if ([objects isKindOfClass:NSSet.class]) {
+            [objectIDs unionSet:[objects valueForKey:@"objectID"]];
+        }
     }
     return objectIDs;
 }
